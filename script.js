@@ -1,63 +1,49 @@
-const values='';
+let currentInput = '';
 
-function updateDisplay(){
-    document.getElementById('display').innerHTML=values || '0';
+function updateDisplay() {
+    document.getElementById('display').value = currentInput;
 }
 
-function appendValue(value){
-    values+=value;
+function append(number) {
+    currentInput += number;
     updateDisplay();
 }
 
-function clearDisplay(){
-    values='';
-    updateDisplay();
-}
-
-function deleteValue(value){
-    values=values.slice(0,-1);
-    updateDisplay();
-}
-
-
-document.addEventListener('keydown', handleKeyPress);
-
-function handleKeyPress(e){
-    const key=e.key;
-    switch(key){
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            appendValue(key);
-            break;
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-            appendValue(key);
-            break;
-        case 'Enter':
-            calculate();
-            break;
-        case 'Backspace':
-            deleteValue();
-            break;
-        case 'Escape':
-            clearDisplay();
-            break;
-        default:
-            break;
+function appendOperator(operator) {
+    if (currentInput && '0123456789'.includes(currentInput.slice(-1))) {
+        currentInput += operator;
+        updateDisplay();
     }
 }
 
-function isOperator(char){
-    return ['+','-','*','/'].includes(char) || char=== '/';
+function calculate() {
+    try {
+        currentInput = eval(currentInput).toString();
+        updateDisplay();
+    } catch {
+        currentInput = 'Error';
+        updateDisplay();
+        setTimeout(clearDisplay, 2000);
+    }
 }
 
+function clearDisplay() {
+    currentInput = '';
+    updateDisplay();
+}
+
+document.addEventListener('keydown', (event) => {
+    const allowedKeys = '0123456789+-*/'.split('');
+    const { key } = event;
+    if (key === 'Enter') {
+        event.preventDefault();
+        calculate();
+    } else if (key === 'Escape') {
+        clearDisplay();
+    } else if (allowedKeys.includes(key)) {
+        append(key);
+    } else if (key === 'Backspace') {
+        currentInput = currentInput.slice(0, -1);
+        updateDisplay();
+    }
+});
